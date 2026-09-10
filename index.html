@@ -1,0 +1,736 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AQUA VIGIL | Smart Water Monitoring</title>
+
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: Arial, Helvetica, sans-serif;
+        }
+
+        body {
+            background: #071923;
+            color: #fff;
+        }
+
+        .app {
+            display: flex;
+            min-height: 100vh;
+        }
+
+        /* SIDEBAR */
+        .sidebar {
+            width: 240px;
+            background: #06141d;
+            border-right: 1px solid #163442;
+            padding: 25px 18px;
+            position: fixed;
+            height: 100vh;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 35px;
+        }
+
+        .logo-icon {
+            width: 42px;
+            height: 42px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #00d4ff, #49d17d);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 22px;
+        }
+
+        .logo h1 {
+            font-size: 21px;
+            letter-spacing: 1px;
+        }
+
+        .logo span {
+            color: #19c9ee;
+        }
+
+        .menu {
+            list-style: none;
+        }
+
+        .menu li {
+            padding: 14px 15px;
+            margin: 7px 0;
+            border-radius: 9px;
+            color: #9eb4bd;
+            cursor: pointer;
+            transition: .2s;
+        }
+
+        .menu li:hover,
+        .menu li.active {
+            background: #0d3444;
+            color: #fff;
+        }
+
+        .system-status {
+            position: absolute;
+            bottom: 25px;
+            left: 20px;
+            right: 20px;
+            background: #0b2632;
+            border-radius: 10px;
+            padding: 15px;
+            font-size: 13px;
+            color: #9eb4bd;
+        }
+
+        .online {
+            color: #42d47c;
+            font-weight: bold;
+        }
+
+        /* MAIN */
+        .main {
+            margin-left: 240px;
+            width: calc(100% - 240px);
+            padding: 25px;
+        }
+
+        .topbar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 25px;
+        }
+
+        .topbar h2 {
+            font-size: 26px;
+        }
+
+        .topbar p {
+            color: #8faab4;
+            margin-top: 5px;
+        }
+
+        .location {
+            background: #0d2b37;
+            padding: 10px 16px;
+            border-radius: 8px;
+            color: #b7d2db;
+        }
+
+        /* STATUS */
+        .status-banner {
+            background: linear-gradient(90deg, #0d473b, #092c35);
+            border: 1px solid #1e755d;
+            padding: 20px;
+            border-radius: 13px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .status-left {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .status-dot {
+            width: 18px;
+            height: 18px;
+            background: #3edb79;
+            border-radius: 50%;
+            box-shadow: 0 0 15px #3edb79;
+        }
+
+        .safe {
+            color: #42dd82;
+            font-weight: bold;
+        }
+
+        /* CARDS */
+        .cards {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 15px;
+        }
+
+        .card {
+            background: #0b202b;
+            border: 1px solid #173744;
+            border-radius: 13px;
+            padding: 20px;
+        }
+
+        .card-title {
+            color: #8faab4;
+            font-size: 14px;
+            margin-bottom: 12px;
+        }
+
+        .value {
+            font-size: 31px;
+            font-weight: bold;
+        }
+
+        .unit {
+            font-size: 13px;
+            color: #819ba5;
+        }
+
+        .good {
+            color: #3edb79;
+        }
+
+        .warning {
+            color: #f2bd4b;
+        }
+
+        .card small {
+            display: block;
+            color: #738e99;
+            margin-top: 10px;
+        }
+
+        /* CONTENT GRID */
+        .content {
+            display: grid;
+            grid-template-columns: 2fr 1fr;
+            gap: 18px;
+            margin-top: 18px;
+        }
+
+        .panel {
+            background: #0b202b;
+            border: 1px solid #173744;
+            border-radius: 13px;
+            padding: 20px;
+        }
+
+        .panel h3 {
+            margin-bottom: 18px;
+        }
+
+        /* GRAPH */
+        .graph {
+            height: 240px;
+            display: flex;
+            align-items: flex-end;
+            gap: 9px;
+            padding: 20px 5px 0;
+            border-bottom: 1px solid #28444e;
+        }
+
+        .bar {
+            flex: 1;
+            background: linear-gradient(to top, #087b99, #19c9ee);
+            border-radius: 5px 5px 0 0;
+            min-height: 20px;
+            animation: grow 1s ease;
+        }
+
+        @keyframes grow {
+            from {
+                height: 0
+            }
+        }
+
+        /* PURIFICATION */
+        .stage {
+            display: flex;
+            align-items: center;
+            gap: 13px;
+            padding: 12px 0;
+            border-bottom: 1px solid #173744;
+        }
+
+        .stage:last-child {
+            border-bottom: none;
+        }
+
+        .stage-icon {
+            width: 38px;
+            height: 38px;
+            border-radius: 9px;
+            background: #0e3442;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .stage-info {
+            flex: 1;
+        }
+
+        .stage-info strong {
+            display: block;
+            font-size: 14px;
+        }
+
+        .stage-info small {
+            color: #718c96;
+        }
+
+        .progress {
+            width: 100px;
+            height: 6px;
+            background: #18343e;
+            border-radius: 5px;
+            overflow: hidden;
+        }
+
+        .progress span {
+            display: block;
+            height: 100%;
+            background: #25c8e8;
+        }
+
+        /* BOTTOM */
+        .bottom {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
+            gap: 18px;
+            margin-top: 18px;
+        }
+
+        .info-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 11px 0;
+            border-bottom: 1px solid #173744;
+            color: #a4bac2;
+        }
+
+        .info-row strong {
+            color: #fff;
+        }
+
+        .alert {
+            padding: 12px;
+            background: #132b33;
+            border-left: 4px solid #3edb79;
+            border-radius: 5px;
+            margin-bottom: 10px;
+            font-size: 13px;
+        }
+
+        .alert.yellow {
+            border-color: #f2bd4b;
+        }
+
+        /* RESPONSIVE */
+        @media(max-width:1000px) {
+            .sidebar {
+                width: 190px;
+            }
+
+            .main {
+                margin-left: 190px;
+                width: calc(100% - 190px);
+            }
+
+            .cards {
+                grid-template-columns: repeat(2, 1fr);
+            }
+
+            .content,
+            .bottom {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        @media(max-width:700px) {
+            .sidebar {
+                display: none;
+            }
+
+            .main {
+                margin-left: 0;
+                width: 100%;
+                padding: 15px;
+            }
+
+            .cards {
+                grid-template-columns: 1fr 1fr;
+            }
+
+            .status-banner {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 12px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="app">
+
+        <!-- SIDEBAR -->
+        <aside class="sidebar">
+
+            <div class="logo">
+                <div class="logo-icon">💧</div>
+                <h1>AQUA <span>VIGIL</span></h1>
+            </div>
+
+            <ul class="menu">
+                <li class="active">⌂ Dashboard</li>
+                <li>◉ Water Quality</li>
+                <li>⚙ Purification</li>
+                <li>▣ Sensor Status</li>
+                <li>🔔 Alerts</li>
+                <li>◴ Historical Data</li>
+                <li>⚙ Settings</li>
+            </ul>
+
+            <div class="system-status">
+                SYSTEM STATUS<br><br>
+                <span class="online">● ONLINE</span><br>
+                ESP32 Connected<br>
+                Cloud Sync Active
+            </div>
+
+        </aside>
+
+
+        <!-- MAIN -->
+        <main class="main">
+
+            <div class="topbar">
+                <div>
+                    <h2>Water Quality Dashboard</h2>
+                    <p>Real-time AQUA VIGIL monitoring system</p>
+                </div>
+
+                <div class="location">
+                    📍 Community Water Point
+                </div>
+            </div>
+
+
+            <!-- STATUS -->
+            <div class="status-banner">
+
+                <div class="status-left">
+                    <div class="status-dot"></div>
+
+                    <div>
+                        <strong>WATER QUALITY</strong>
+                        <div class="safe">SAFE FOR RELEASE</div>
+                    </div>
+                </div>
+
+                <div>
+                    Last updated:
+                    <strong id="time">--:--:--</strong>
+                </div>
+
+            </div>
+
+
+            <!-- SENSOR CARDS -->
+            <section class="cards">
+
+                <div class="card">
+                    <div class="card-title">pH LEVEL</div>
+                    <div class="value good" id="ph">7.2</div>
+                    <div class="unit">pH</div>
+                    <small>✓ Within safe range</small>
+                </div>
+
+                <div class="card">
+                    <div class="card-title">TURBIDITY</div>
+                    <div class="value good" id="turbidity">0.42</div>
+                    <div class="unit">NTU</div>
+                    <small>✓ Excellent clarity</small>
+                </div>
+
+                <div class="card">
+                    <div class="card-title">TDS / EC</div>
+                    <div class="value good" id="tds">120</div>
+                    <div class="unit">ppm</div>
+                    <small>✓ Within threshold</small>
+                </div>
+
+                <div class="card">
+                    <div class="card-title">TEMPERATURE</div>
+                    <div class="value" id="temp">26.5</div>
+                    <div class="unit">°C</div>
+                    <small>Stable</small>
+                </div>
+
+            </section>
+
+
+            <!-- GRAPH + PURIFICATION -->
+            <section class="content">
+
+                <div class="panel">
+
+                    <h3>📈 Water Quality Trend</h3>
+
+                    <div class="graph" id="graph">
+
+                        <div class="bar" style="height:40%"></div>
+                        <div class="bar" style="height:52%"></div>
+                        <div class="bar" style="height:45%"></div>
+                        <div class="bar" style="height:65%"></div>
+                        <div class="bar" style="height:58%"></div>
+                        <div class="bar" style="height:73%"></div>
+                        <div class="bar" style="height:67%"></div>
+                        <div class="bar" style="height:81%"></div>
+                        <div class="bar" style="height:74%"></div>
+                        <div class="bar" style="height:88%"></div>
+
+                    </div>
+
+                    <div style="margin-top:15px;color:#819ba5;font-size:13px;">
+                        Live sensor data • Last 10 readings
+                    </div>
+
+                </div>
+
+
+                <div class="panel">
+
+                    <h3>⚙ Purification Stages</h3>
+
+                    <div class="stage">
+                        <div class="stage-icon">💧</div>
+                        <div class="stage-info">
+                            <strong>Sediment Filter</strong>
+                            <small>Active</small>
+                        </div>
+                        <div class="progress"><span style="width:85%"></span></div>
+                    </div>
+
+                    <div class="stage">
+                        <div class="stage-icon">⬛</div>
+                        <div class="stage-info">
+                            <strong>Activated Carbon</strong>
+                            <small>Active</small>
+                        </div>
+                        <div class="progress"><span style="width:72%"></span></div>
+                    </div>
+
+                    <div class="stage">
+                        <div class="stage-icon">◆</div>
+                        <div class="stage-info">
+                            <strong>Targeted Adsorption</strong>
+                            <small>Heavy Metals</small>
+                        </div>
+                        <div class="progress"><span style="width:64%"></span></div>
+                    </div>
+
+                    <div class="stage">
+                        <div class="stage-icon">▣</div>
+                        <div class="stage-info">
+                            <strong>UF / Membrane</strong>
+                            <small>Active</small>
+                        </div>
+                        <div class="progress"><span style="width:78%"></span></div>
+                    </div>
+
+                    <div class="stage">
+                        <div class="stage-icon">☀</div>
+                        <div class="stage-info">
+                            <strong>UV Disinfection</strong>
+                            <small>Active</small>
+                        </div>
+                        <div class="progress"><span style="width:76%"></span></div>
+                    </div>
+
+                </div>
+
+            </section>
+
+
+            <!-- BOTTOM PANELS -->
+            <section class="bottom">
+
+                <!-- HARDWARE -->
+                <div class="panel">
+
+                    <h3>🔌 Hardware Status</h3>
+
+                    <div class="info-row">
+                        <span>ESP32 Controller</span>
+                        <strong class="good">ONLINE</strong>
+                    </div>
+
+                    <div class="info-row">
+                        <span>pH Sensor</span>
+                        <strong class="good">OK</strong>
+                    </div>
+
+                    <div class="info-row">
+                        <span>Turbidity Sensor</span>
+                        <strong class="good">OK</strong>
+                    </div>
+
+                    <div class="info-row">
+                        <span>TDS / EC Sensor</span>
+                        <strong class="good">OK</strong>
+                    </div>
+
+                    <div class="info-row">
+                        <span>Temperature Sensor</span>
+                        <strong class="good">OK</strong>
+                    </div>
+
+                </div>
+
+
+                <!-- POWER -->
+                <div class="panel">
+
+                    <h3>☀ Power System</h3>
+
+                    <div class="info-row">
+                        <span>Solar Panel</span>
+                        <strong class="good">CHARGING</strong>
+                    </div>
+
+                    <div class="info-row">
+                        <span>Battery</span>
+                        <strong>87%</strong>
+                    </div>
+
+                    <div class="info-row">
+                        <span>System Load</span>
+                        <strong>42 W</strong>
+                    </div>
+
+                    <div class="info-row">
+                        <span>Estimated Backup</span>
+                        <strong>3.8 Days</strong>
+                    </div>
+
+                    <div class="info-row">
+                        <span>Cloud Connection</span>
+                        <strong class="good">CONNECTED</strong>
+                    </div>
+
+                </div>
+
+
+                <!-- ALERTS -->
+                <div class="panel">
+
+                    <h3>🔔 Alerts & Maintenance</h3>
+
+                    <div class="alert">
+                        ✓ Water quality within safe limits
+                    </div>
+
+                    <div class="alert">
+                        ✓ All sensors functioning normally
+                    </div>
+
+                    <div class="alert yellow">
+                        ⚠ Activated carbon filter: 28% life remaining
+                    </div>
+
+                    <div class="alert">
+                        ✓ Solar power system operational
+                    </div>
+
+                </div>
+
+            </section>
+
+        </main>
+
+    </div>
+
+
+    <script>
+
+        /* LIVE CLOCK */
+
+        function updateClock() {
+
+            const now = new Date();
+
+            document.getElementById("time").innerText =
+                now.toLocaleTimeString();
+
+        }
+
+        setInterval(updateClock, 1000);
+        updateClock();
+
+
+        /* SIMULATED SENSOR DATA */
+
+        function updateSensors() {
+
+            let ph =
+                (7.1 + Math.random() * 0.2).toFixed(2);
+
+            let turbidity =
+                (0.30 + Math.random() * 0.30).toFixed(2);
+
+            let tds =
+                Math.floor(110 + Math.random() * 30);
+
+            let temp =
+                (26 + Math.random() * 1.5).toFixed(1);
+
+
+            document.getElementById("ph").innerText = ph;
+
+            document.getElementById("turbidity").innerText =
+                turbidity;
+
+            document.getElementById("tds").innerText =
+                tds;
+
+            document.getElementById("temp").innerText =
+                temp;
+
+
+            /* UPDATE GRAPH */
+
+            const graph =
+                document.getElementById("graph");
+
+            const newBar =
+                document.createElement("div");
+
+            newBar.className = "bar";
+
+            newBar.style.height =
+                (40 + Math.random() * 50) + "%";
+
+            graph.appendChild(newBar);
+
+
+            if (graph.children.length > 10) {
+                graph.removeChild(graph.children[0]);
+            }
+
+        }
+
+
+        /* Update every 4 seconds */
+
+        setInterval(updateSensors, 4000);
+
+    </script>
+
+</body>
+
+</html>
